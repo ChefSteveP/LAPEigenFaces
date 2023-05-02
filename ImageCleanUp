@@ -1,0 +1,73 @@
+from PIL import Image
+from pathlib import Path
+import os
+import cv2
+import numpy as np
+import json
+
+##Site Later: https://www.geeksforgeeks.org/how-to-iterate-over-files-in-directory-using-python/
+
+#Create new folder, output files to it. If it already exists then do nothing.
+os.makedirs( '/LinearProject/formattedImgs/', exist_ok=True )
+
+
+# assign directory
+directory = 'AvaUnproccessed'
+faces = {}
+faces['images'] = []
+count = 0
+# iterate over files in that directory which loops through all images
+for filename in os.listdir(directory):
+    f = os.path.join(directory, filename)
+
+    # Checking if it is a file. If so,'f' is the filename
+    if os.path.isfile(f):
+
+        ###########image processing here ##################
+
+        # open image through open CV 
+        im = cv2.imread(f)
+        #greyscale through openCV cvtColor
+        greyScale = cv2.cvtColor(im, cv2.COLOR_RGB2GRAY)
+        #convert from openCV to Pillow
+        image = Image.fromarray(greyScale)  
+        #grab dimetions for cropping purposes
+        width, height = image.size
+        centerY = height/2
+        centerX = width/2
+
+        #This parameter gets twaked per person to grab face
+        offset = 1/4 * height
+
+        left = centerX - offset 
+        top = centerY + offset
+        right = centerX + offset
+        bottom = (centerY - offset)
+
+        #crop image square
+        image = image.crop((left, bottom, right, top))
+        #size it down
+        image = image.resize((64,64))
+        
+        imageData = np.asarray(image)
+
+        faces['images'].append(imageData.tolist())
+
+    count += 1
+    
+        
+        
+with open("Ava-1.json", "w") as outfile:
+            json.dump(faces, outfile)
+        
+        
+
+    
+   
+
+    
+
+    
+
+
+
